@@ -30,7 +30,27 @@ export default class UsersController {
         }
     }
 
-    public async getRole({response}: HttpContextContract) {
-        return response.json({role: 'Hola'})
+    public async getRole({auth, response}: HttpContextContract) {
+        try {
+            await auth.use('jwt').authenticate();
+            const payload = auth.use('jwt').payload!;
+            const userId = payload['userId'];
+            const user = await User.find(userId);
+            const roleId = user?.role_id;
+            return response.json({message: roleId?.toString()});
+
+            // Por si se necesita el nombre del rol del usuario
+            // await auth.use('jwt').authenticate();
+            // const payload = auth.use('jwt').payload!;
+            // const userId = payload['userId'];
+            // const user = await User.find(userId);
+            // const roleId = user?.role_id;
+            // const role = await Role.find(roleId);
+            // const roleName = role?.rol; 
+            // return response.json({role: roleName});
+            
+        } catch (error) {
+            return response.status(401).json({message: 'No autorizado', error: error})
+        }
     }
 }
