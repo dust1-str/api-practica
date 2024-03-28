@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, column, hasMany, HasMany, manyToMany, ManyToMany } from '@ioc:Adonis/Lucid/Orm'
 import User from './User'
+import View from './View'
 
 export default class Role extends BaseModel {
   @column({ isPrimary: true })
@@ -9,12 +10,17 @@ export default class Role extends BaseModel {
   @column()
   public rol: String
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, serializeAs: null})
   public createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, serializeAs: null})
   public updatedAt: DateTime
 
   @hasMany(() => User)
   public users: HasMany<typeof User>
+
+  @manyToMany(() => View, {
+    pivotTable: 'role_views',
+  })
+  public views: ManyToMany<typeof View>
 }

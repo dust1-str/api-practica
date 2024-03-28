@@ -3,7 +3,8 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import User from 'App/Models/User'
 
 export default class AuthController {
-    public async login({request, response, auth}: HttpContextContract) {
+    public async login({request, response, auth}: HttpContextContract)
+    {
         const data = request.only(['email', 'password'])
         const user = await User.findBy('email', data.email)
         if (!user) {

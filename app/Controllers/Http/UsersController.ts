@@ -1,56 +1,98 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import User from 'App/Models/User'
-import { schema, rules } from '@ioc:Adonis/Core/Validator'
+import UserValidator from 'App/Validators/UserValidator'
 import Hash from '@ioc:Adonis/Core/Hash'
 
 export default class UsersController {
-    public async register({request, response}: HttpContextContract) {
-        const validador = schema.create({
-            name: schema.string({}, [
-                rules.minLength(2),
-                rules.maxLength(50)
-            ]),
-            email: schema.string({}, [
-                rules.email(),
-                rules.unique({ table: 'users', column: 'email' }),
-            ]),
-            password: schema.string({}, [
-                rules.minLength(8),
-                rules.maxLength(12),
-            ]),
-        })
-        const data = await request.validate({schema: validador})
+    public async index({response}: HttpContextContract) 
+    {
+        try {
+            const users = await User.all();
+            return response.json(users);
+        } catch (error) {
+            return response.status(500).json({error: error})
+        }
+    }
+
+    public async show({response, params}: HttpContextContract)
+    {
+        try {
+            const user = await User.findOrFail(params.id);
+            return response.json(user);
+        } catch (error) {
+            if (error.code === 'E_ROW_NOT_FOUND') {
+                return response.status(404).json({error: 'Usuario no encontrado'})
+            }
+            return response.status(500).json({error: error})
+        }
+    }
+
+    public async store({request, response}: HttpContextContract)
+    {
+        const data = await request.validate(UserValidator)
+        try {
+            data.password = await Hash.make(data.password)
+            await User.create(data)
+            return response.status(201).json({message: 'Usuario creado exitosamente'})
+        }
+        catch (error) {
+            return response.status(500).json({error: error.message})
+        }
+    }
+
+    public async update({params, response, request}: HttpContextContract)
+    {
+        const userData = await request.validate(UserValidator);
+        try {
+            const user = await User.findOrFail(params.id);
+            userData.password = await Hash.make(userData.password);
+            await user.merge(userData).save();
+            return response.json({message: 'Usuario actualizado exitosamente'});
+        } catch (error) {
+            if (error.code === 'E_ROW_NOT_FOUND'){
+                return response.status(404).json({error: 'Usuario no encontrado'})
+            }
+            return response.status(500).json({error: error});
+        }
+    }
+
+    public async destroy({response, params}: HttpContextContract)
+    {
+        try {
+            const user = await User.findOrFail(params.id)
+            await user.delete()
+            return response.json({message: 'Usuario eliminado exitosamente'});
+        } catch (error) {
+            if (error.code === 'E_ROW_NOT_FOUND'){
+                return response.status(404).json({error: 'Usuario no encontrado'})
+            }
+            return response.status(500).json({error: error});
+        }
+    }
+
+    public async register({request, response}: HttpContextContract) 
+    {
+        const data = await request.validate(UserValidator)
         try {
             data.password = await Hash.make(data.password)
             await User.create(data)
             return response.json({message: 'Usuario creado exitosamente'})
         }
         catch (error) {
-            return response.status(400).json({error: error.message})
+            return response.status(500).json({error: error.message})
         }
     }
 
-    public async getRole({auth, response}: HttpContextContract) {
+    public async getRole({auth, response}: HttpContextContract) 
+    {
         try {
-            await auth.use('jwt').authenticate();
             const payload = auth.use('jwt').payload!;
             const userId = payload['userId'];
             const user = await User.find(userId);
             const roleId = user?.role_id;
-            return response.json({message: roleId?.toString()});
-
-            // Por si se necesita el nombre del rol del usuario
-            // await auth.use('jwt').authenticate();
-            // const payload = auth.use('jwt').payload!;
-            // const userId = payload['userId'];
-            // const user = await User.find(userId);
-            // const roleId = user?.role_id;
-            // const role = await Role.find(roleId);
-            // const roleName = role?.rol; 
-            // return response.json({role: roleName});
-            
+            return response.json({message: roleId?.toString()});            
         } catch (error) {
-            return response.status(401).json({message: 'No autorizado', error: error})
+            return response.status(500).json({error: error.message})
         }
     }
 }
