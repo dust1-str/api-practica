@@ -7,8 +7,12 @@ export default class UsersController {
     public async index({response}: HttpContextContract) 
     {
         try {
-            const users = await User.all();
-            return response.json(users);
+            const users = await User.query().preload('role');
+            // const usersWithRoleNames = users.map(user => {
+            //     return {...user.serialize(), role: user.role.rol}
+            // })
+            // return response.json(usersWithRoleNames);
+            return response.ok(users);
         } catch (error) {
             return response.status(500).json({error: error})
         }
@@ -18,7 +22,8 @@ export default class UsersController {
     {
         try {
             const user = await User.findOrFail(params.id);
-            return response.json(user);
+            await user.load('role');
+            return response.json({...user.serialize(), role: user.role.rol});
         } catch (error) {
             if (error.code === 'E_ROW_NOT_FOUND') {
                 return response.status(404).json({error: 'Usuario no encontrado'})
