@@ -41,5 +41,6 @@ Server.middleware.register([
 |
 */
 Server.middleware.registerNamed({
-    jwt: () => import('App/Middleware/JwtAuth')
+    jwt: () => import('App/Middleware/JwtAuth'),
+    role: () => import('App/Middleware/RolMiddleware')
 })

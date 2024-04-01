@@ -16,7 +16,7 @@ Route.group(() => {
     Route.post('/users', 'UsersController.store')
     Route.put('/users/:id', 'UsersController.update')
     Route.delete('/users/:id', 'UsersController.destroy')
-  })
+  }).middleware('role:1')
 
   Route.group(() => {
     Route.get('/roles', 'RolesController.index')

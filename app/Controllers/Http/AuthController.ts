@@ -11,7 +11,13 @@ export default class AuthController {
             return response.status(404).json({error: 'Usuario no encontrado'})
         } else {
             if (await Hash.verify(user.password.toString(), data.password)) {
-                const token = await auth.use('jwt').login(user);
+                const token = await auth.use('jwt').login(user, {
+                    payload: {
+                        name: user.name,
+                        email: user.email,
+                        role: user.role_id
+                    }
+                });
                 return response.json({message: 'Inicio de sesion exitoso',token: token.accessToken})
             } else {
                 return response.status(400).json({error: 'Credenciales incorrectas'})
