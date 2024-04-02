@@ -5,17 +5,21 @@ Route.get('/', async () => {
 })
 
 Route.post('/login', 'AuthController.login')
-Route.post('/register', 'UsersController.register')
+Route.post('/register', 'AuthController.register')
+
 
 Route.group(() => {
-  Route.get('/getRole', 'UsersController.getRole')
+  Route.get('/getRole', 'AuthController.getRole')
+  Route.post('/refresh', 'AuthController.refresh')
+  Route.post('/logout', 'AuthController.logout')
+
   Route.group(() => {
     Route.get('/users', 'UsersController.index')
     Route.get('/users/:id', 'UsersController.show')
     Route.post('/users', 'UsersController.store')
     Route.put('/users/:id', 'UsersController.update')
     Route.delete('/users/:id', 'UsersController.destroy')
-  }).middleware('role:1,2')
+  }).middleware('role:1,2,3')
 
   Route.group(() => {
     Route.get('/roles', 'RolesController.index')

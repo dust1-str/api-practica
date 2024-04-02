@@ -1,7 +1,6 @@
 import BaseSeeder from '@ioc:Adonis/Lucid/Seeder'
 import Role from 'App/Models/Role'
 import RoleView from 'App/Models/RoleView'
-import User from 'App/Models/User'
 import View from 'App/Models/View'
 
 export default class extends BaseSeeder {

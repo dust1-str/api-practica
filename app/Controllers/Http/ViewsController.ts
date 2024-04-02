@@ -39,9 +39,9 @@ export default class ViewsController {
 
     public async update({params, response, request}: HttpContextContract)
     {
-        const viewData = await request.validate(ViewValidator);
         try {
             const view = await View.findOrFail(params.id);
+            const viewData = await request.validate(ViewValidator);
             await view.merge(viewData).save();
             return response.json({message: 'Vista actualizada exitosamente'});
         } catch (error) {

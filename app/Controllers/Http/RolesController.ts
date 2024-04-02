@@ -39,14 +39,14 @@ export default class RolesController {
 
     public async update({params, response, request}: HttpContextContract)
     {
-        const roleData = await request.validate(RoleValidator);
         try {
             const role = await Role.findOrFail(params.id);
+            const roleData = await request.validate(RoleValidator);
             await role.merge(roleData).save();
             return response.json({message: 'Rol actualizado exitosamente'});
         } catch (error) {
             if (error.code === 'E_ROW_NOT_FOUND') {
-                return response.status(404).json({error: 'Rol no encontrado'})
+                return response.status(404).json({error: 'Rol a actualizar no encontrado'})
             }
             return response.status(500).json({error: error})
         }
